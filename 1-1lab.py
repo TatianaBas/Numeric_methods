@@ -36,10 +36,13 @@ def read_tridiagonal_matrix(n):
 def solve(A, b):
     n = len(A)
     ok = True
-    for i in range(1, n-1):
+    for i in range(1, n-2):
         if abs(A[i][i]) < abs(A[i][i-1]) + abs(A[i][i+1]):
             ok = False
             return ValueError("Достаточное условие не выполнено!")
+    if(abs(A[0][0]) < abs(A[0][1])) or (abs(A[n-1][n-1]) < abs (A[n-1][n-2])):
+        ok = False
+        return ValueError("Достаточное условие не выполнено!")
     # Шаг 1
     v = [0 for i in range(n)]
     u = [0 for i in range(n)]
