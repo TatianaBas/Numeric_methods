@@ -68,10 +68,19 @@ def print_matrix(A):
     for row in A:
         print(' '.join(f'{val:6.2f}' for val in row))
 
+def multiply_matrix_vector(A, x):
+    """Проверка."""
+    n = len(A)
+    result = [0] * n
+    for i in range(n):
+        result[i] = sum(A[i][j] * x[j] for j in range(n))
+    return result
+
 if __name__ == '__main__':
     n = int(input('Enter the size of matrix: '))
     print('Enter matrix A')
     A = [list(map(float, input().split())) for _ in range(n)]
+    A_copy = [row[:] for row in A]
     print('Enter vector b')
     b = list(map(float, input().split()))
 
@@ -88,3 +97,6 @@ if __name__ == '__main__':
     print("A^(-1)")
     print_matrix(inverse_matrix(LU))
 
+    print("check")
+    Ax = multiply_matrix_vector(A_copy, x)
+    print("A* x = ", Ax)
