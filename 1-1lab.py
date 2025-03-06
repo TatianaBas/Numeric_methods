@@ -23,6 +23,13 @@ A^(-1)
   0.01  -0.17   0.03  -0.00
  -0.03  -0.02   0.08   0.01
  -0.05   0.12  -0.19   0.14
+A * A^(-1)
+  1.00   0.00   0.00   0.00
+  0.00   1.00   0.00  -0.00
+  0.00   0.00   1.00   0.00
+  0.00   0.00   0.00   1.00
+check solution
+A* x =  [-8.0, 38.0, 47.0, -8.000000000000007]
 
 """
 
@@ -76,6 +83,15 @@ def multiply_matrix_vector(A, x):
         result[i] = sum(A[i][j] * x[j] for j in range(n))
     return result
 
+def multiply_matrices(A, B):
+    """Перемножает две матрицы A и B."""
+    n = len(A)
+    result = [[0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            result[i][j] = sum(A[i][k] * B[k][j] for k in range(n))
+    return result
+
 if __name__ == '__main__':
     n = int(input('Enter the size of matrix: '))
     print('Enter matrix A')
@@ -95,8 +111,14 @@ if __name__ == '__main__':
     print("det A =", determinant(LU))
 
     print("A^(-1)")
-    print_matrix(inverse_matrix(LU))
+    A_inv = inverse_matrix(LU)
+    print_matrix(A_inv)
 
-    print("check")
+    print("A * A^(-1)")
+    identity = multiply_matrices(A_copy, A_inv)
+    print_matrix(identity)
+
+
+    print("check solution")
     Ax = multiply_matrix_vector(A_copy, x)
     print("A* x = ", Ax)
