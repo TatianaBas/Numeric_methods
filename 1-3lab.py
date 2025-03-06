@@ -24,114 +24,95 @@ Iterations: 6
 
 
 """
-
-
 import math
 
 def L2_norm(X):
     """
     Вычисляет норму вектора L2.
     """
-    l2_norm = sum(x * x for x in X)
-    return math.sqrt(l2_norm)
+    return math.sqrt(sum(x * x for x in X))
 
-def matrix_vector_multiplication(A, x):
+def is_diagonally_dominant(A):
     """
-    Умножает матрицу A на вектор x.
+    Проверяет достаточное условие единственности решения: диагональное преобладание.
     """
-    result = [0] * len(A)
-    for i in range(len(A)):
-        for j in range(len(A[i])):
-            result[i] += A[i][j] * x[j]
-    return result
+    n = len(A)
+    for i in range(n):
+        if abs(A[i][i]) <= sum(abs(A[i][j]) for j in range(n) if i != j):
+            return False
+    return True
+
+def is_diagonally_dominant2(A):
+    """
+    Проверяет достаточное условие единственности решения: диагональное преобладание по столбцам.
+    """
+    n = len(A)
+    for i in range(n):
+        if abs(A[i][i]) <= sum(abs(A[j][i]) for j in range(n) if i != j):
+            return False
+    return True
 
 def solve_iterative(A, b, eps):
     """
     Метод простых итераций для решения Ax = b.
     """
     n = len(A)
-    alpha = [[0] * n for _ in range(n)]
-    beta = [0] * n
-
-    # Преобразуем уравнение
-    for i in range(n):
-        for j in range(n):
-            if i == j:
-                alpha[i][j] = 0
-            else:
-                alpha[i][j] = -A[i][j] / A[i][i]
-        beta[i] = b[i] / A[i][i]
-
-    # Итерации
+    decimal_places = len(str(eps).split('.')[-1]) if '.' in str(eps) else 0
     iterations = 0
-    cur_x = beta[:]
+    cur_x = [b[i] / A[i][i] for i in range(n)]  # Начальное приближение
     converge = False
+    
     while not converge:
         prev_x = cur_x[:]
-        cur_x = [sum(alpha[i][j] * prev_x[j] for j in range(n)) + beta[i] for i in range(n)]
+        cur_x = [
+            round(sum(-A[i][j] / A[i][i] * prev_x[j] for j in range(n) if i != j) + b[i] / A[i][i], decimal_places)
+            for i in range(n)
+        ]
         iterations += 1
         converge = L2_norm([prev_x[i] - cur_x[i] for i in range(n)]) <= eps
 
     return cur_x, iterations
-
-def seidel_multiplication(alpha, x, beta):
-    """
-    Умножение alpha * x + beta для метода Зейделя.
-    """
-    res = x[:]
-    for i in range(len(alpha)):
-        res[i] = beta[i]
-        for j in range(len(alpha[i])):
-            res[i] += alpha[i][j] * (res[j] if j < i else x[j])
-    return res
 
 def solve_seidel(A, b, eps):
     """
-    Метод Зейделя для решения Ax = b.
+    Метод Зейделя для решения Ax = b без хранения alpha и beta.
     """
     n = len(A)
-    alpha = [[0] * n for _ in range(n)]
-    beta = [0] * n
-
-    for i in range(n):
-        for j in range(n):
-            if i == j:
-                alpha[i][j] = 0
-            else:
-                alpha[i][j] = -A[i][j] / A[i][i]
-        beta[i] = b[i] / A[i][i]
-
+    decimal_places = len(str(eps).split('.')[-1]) if '.' in str(eps) else 0
     iterations = 0
-    cur_x = beta[:]
+    cur_x = [b[i] / A[i][i] for i in range(n)]  # Начальное приближение
     converge = False
+    
     while not converge:
         prev_x = cur_x[:]
-        cur_x = seidel_multiplication(alpha, cur_x, beta)
+        for i in range(n):
+            sum_val = sum(-A[i][j] / A[i][i] * cur_x[j] for j in range(i)) + \
+                      sum(-A[i][j] / A[i][i] * prev_x[j] for j in range(i + 1, n))
+            cur_x[i] = round(sum_val + b[i] / A[i][i], decimal_places)
         iterations += 1
         converge = L2_norm([prev_x[i] - cur_x[i] for i in range(n)]) <= eps
 
     return cur_x, iterations
 
-
-
 if __name__ == '__main__':
     n = int(input('Enter the size of matrix: '))
-
     print('Enter matrix A')
     A = [list(map(float, input().split())) for _ in range(n)]
-
     print('Enter vector b')
     b = list(map(float, input().split()))
-
     eps = float(input('Enter epsilon: '))
-
+    
+    if not is_diagonally_dominant(A) and not is_diagonally_dominant2(A):
+        raise ValueError("Матрица не удовлетворяет достаточному условию единственности решения (диагональное преобладание).")
+    
     print('Iteration method')
     x_iter, i_iter = solve_iterative(A, b, eps)
     print(x_iter)
     print('Iterations:', i_iter)
     print()
-
+    
     print('Seidel method')
     x_seidel, i_seidel = solve_seidel(A, b, eps)
     print(x_seidel)
     print('Iterations:', i_seidel)
+
