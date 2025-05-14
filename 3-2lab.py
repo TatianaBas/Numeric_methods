@@ -1,3 +1,7 @@
+"""
+Значение в x* = 1.5 : f(x*) = 0.724543
+"""
+
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')

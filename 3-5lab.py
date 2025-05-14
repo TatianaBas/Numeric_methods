@@ -1,3 +1,14 @@
+"""
+Прямоугольники:
+ h1=0.5: -0.07090982378616856, h2=0.25: -0.10243925004315926, уточнённый: -0.1129490587954895, ошибка: 0.010509808752330235
+
+Трапеции:
+ h1=0.5: -0.2637685074244359, h2=0.25: -0.16733916560530224, уточнённый: -0.135196051665591, ошибка: 0.032143113939711226
+
+Симпсон:
+ h1=0.5: -0.18551058521508848, h2=0.25: -0.13519605166559104, уточнённый: -0.13184174942895788, ошибка: 0.003354302236633161
+"""
+
 def frange(start, stop, step):
     values = []
     while start < stop:
@@ -12,20 +23,18 @@ def rectangles(f, x1, xk, h):
 
 
 def trapeze(f, x1, xk, h):
-    x = frange(x1, xk + h / 2, h)
-    result = 0
-    for i in x:
-        if i <= x1 or i >= xk:
-            result += f(i) / 2
-        else:
-            result += f(i)
+    N = int((xk - x1) / h)
+    result = (f(x1) + f(xk)) / 2 
+    for i in range(1, N):
+        xi = x1 + i * h
+        result += f(xi)
     return result * h
 
 
 def simpson(f, x1, xk, h):
     N = int((xk - x1) / h)
     if N % 2 != 0:
-        N += 1  # Симпсон требует чётное число отрезков
+        N += 1 
         h = (xk - x1) / N
     result = f(x1) + f(xk)
     for i in range(1, N):
@@ -35,7 +44,7 @@ def simpson(f, x1, xk, h):
 
 
 # Исходные данные
-y = lambda x: x / (3 * x + 4) ** 3
+y = lambda x: x / (3 * x + 4) ** 2
 x0 = -1
 xk = 1
 h1 = 0.5
