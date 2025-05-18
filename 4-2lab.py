@@ -20,8 +20,8 @@ def Plot2(Xi, Yi, X, Y, title=''):
     plt.scatter(Xi, Yi, c='red', label='Численное решение', zorder=3)
 
     # Нумерация шагов
-    for i, (x, y) in enumerate(zip(Xi, Yi)):
-        plt.text(x, y + 0.03, f'{i}', fontsize=8, color='darkred', ha='center')
+    # for i, (x, y) in enumerate(zip(Xi, Yi)):
+    #     plt.text(x, y + 0.03, f'{i}', fontsize=8, color='darkred', ha='center')
 
     # Точное решение
     plt.plot(X, Y, c='blue', label='Точное решение', linewidth=2)
@@ -159,12 +159,21 @@ class TridiagonalSolver:
         p[0] = -A[0][1] / A[0][0]
         q[0] = d[0] / A[0][0]
 
+        if abs(p[0]) >= 1:
+            raise ValueError(f"Метод прогонки неустойчив")
+
         for i in range(1, n - 1):
             denom = A[i][i] + A[i][i - 1] * p[i - 1]
+
             p[i] = -A[i][i + 1] / denom
             q[i] = (d[i] - A[i][i - 1] * q[i - 1]) / denom
 
-        x[n - 1] = (d[n - 1] - A[n - 1][n - 2] * q[n - 2]) / (A[n - 1][n - 1] + A[n - 1][n - 2] * p[n - 2])
+            if abs(p[i]) >= 1:
+                raise ValueError(f"Метод прогонки неустойчив")
+
+        denom = A[n - 1][n - 1] + A[n - 1][n - 2] * p[n - 2]
+
+        x[n - 1] = (d[n - 1] - A[n - 1][n - 2] * q[n - 2]) / denom
 
         for i in range(n - 2, -1, -1):
             x[i] = p[i] * x[i + 1] + q[i]
@@ -173,6 +182,7 @@ class TridiagonalSolver:
 
     def Ans(self):
         return self.x
+
 
 class FiniteDifferenceMethod:
     def Get(self, n):
